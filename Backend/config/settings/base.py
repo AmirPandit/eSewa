@@ -9,7 +9,7 @@ load_dotenv()  # loads variables from a .env file
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 SECRET_KEY = os.getenv("SECRET_KEY", "your-default-insecure-key")
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 

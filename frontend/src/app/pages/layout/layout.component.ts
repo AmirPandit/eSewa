@@ -21,6 +21,8 @@ interface ChatRoom {
   name: string;
   created_by: number;
   created_at: string;
+  is_member: boolean;
+  members_count: number;
 }
 
 interface UserData {
@@ -29,7 +31,6 @@ interface UserData {
   role: string;
   username: string;
 }
-
 
 @Component({
   selector: 'app-layout',
@@ -53,16 +54,16 @@ interface UserData {
 export class LayoutComponent implements OnInit {
   rooms: ChatRoom[] = [];
   userData: UserData | null = null;
-
   isLoading = true;
   isCreatingRoom = false;
+  isJoiningRoom = false;
+  currentJoiningRoomId: string | null = null;
 
   constructor(
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private router: Router
-    
   ) {}
 
   ngOnInit(): void {
@@ -78,6 +79,7 @@ export class LayoutComponent implements OnInit {
       }
     };
   }
+
   loadUserData(): void {
     const userDataString = localStorage.getItem('user_data');
     if (userDataString) {
@@ -166,5 +168,35 @@ export class LayoutComponent implements OnInit {
     }).add(() => {
       this.isCreatingRoom = false;
     });
+  }
+
+  joinRoom(roomId: string): void {
+    this.isJoiningRoom = true;
+    this.currentJoiningRoomId = roomId;
+    
+    this.http.post(
+      `http://127.0.0.1:8000/api/v1/chat/rooms/${roomId}/join/`,
+      {},
+      this.getAuthHeaders()
+    ).subscribe({
+      next: () => {
+        this.snackBar.open('Successfully joined room', 'Close', { duration: 3000 });
+        this.loadRooms(); // Refresh the room list
+      },
+      error: (error) => {
+        if (error.status === 401) {
+          this.router.navigate(['/login']);
+        }
+        this.snackBar.open('Failed to join room', 'Close', { duration: 3000 });
+      },
+      complete: () => {
+        this.isJoiningRoom = false;
+        this.currentJoiningRoomId = null;
+      }
+    });
+  }
+
+  isJoiningCurrentRoom(roomId: string): boolean {
+    return this.isJoiningRoom && this.currentJoiningRoomId === roomId;
   }
 }
