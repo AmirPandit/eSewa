@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDividerModule } from '@angular/material/divider';
 
 
 @Component({
@@ -24,9 +25,11 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
     MatInputModule,
     HttpClientModule,
     MatButtonModule,
+    MatDividerModule,
     MatIconModule,
     MatSnackBarModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    RouterLink
   ],
   standalone: true,
   templateUrl: './login.component.html',
@@ -86,7 +89,7 @@ export class LoginComponent {
           }
         },
         error: (error) => {
-          this.showError(error.error?.message || 'An error occurred during login.');
+          this.showError('Login failed. Please try again.');
         }
       }).add(() => {
         this.isLoading = false;
