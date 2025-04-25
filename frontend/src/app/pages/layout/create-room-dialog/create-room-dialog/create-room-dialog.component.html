@@ -1,0 +1,29 @@
+<h2 mat-dialog-title>Create New Room</h2>
+
+<mat-dialog-content>
+  <mat-form-field appearance="outline" class="full-width">
+    <mat-label>Room Name</mat-label>
+    <input matInput [formControl]="roomName" required />
+    <mat-error *ngIf="roomName.hasError('required')"
+      >Name is required</mat-error
+    >
+    <mat-error *ngIf="roomName.hasError('minlength')"
+      >Name must be at least 1 character</mat-error
+    >
+    <mat-error *ngIf="roomName.hasError('maxlength')"
+      >Name must be less than 255 characters</mat-error
+    >
+  </mat-form-field>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="onCreate()"
+    [disabled]="!roomName.valid"
+  >
+    Create
+  </button>
+</mat-dialog-actions>

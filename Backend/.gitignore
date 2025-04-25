@@ -1,0 +1,57 @@
+*.pyc
+*.pyo
+*.pyd
+__pycache__
+.pytest_cache
+*.sqlite3
+*.log
+
+*.log
+*.pot
+*.pyc
+*.pyo
+__pycache__
+
+# Database
+*.db
+*.sqlite3
+
+# Virtual Environment
+venv/
+.env/
+
+# IDEs and Editors
+.vscode/
+.idea/
+
+# Django migrations
+**/migrations/*
+!**/migrations/__init__.py
+
+# Local Django settings (e.g., settings.py, local.py)
+local_settings.py
+
+# Media and static files (if not using separate static hosting)
+static/
+media/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Environment variable files
+.env
+*.env
+
+# Docker
+docker-compose.override.yml
+*.dockerignore
+Dockerfile
+.docker-compose.yml
+
+# VS Code
+.vscode/
+*.code-workspace
+
+venv/
+
+staticfiles/

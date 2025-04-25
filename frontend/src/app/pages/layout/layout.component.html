@@ -1,0 +1,74 @@
+<div class="layout-container">
+  <mat-sidenav-container class="sidenav-container">
+    <!-- Sidebar -->
+    <mat-sidenav #sidenav mode="side" opened class="sidenav">
+      <!-- Fixed Header -->
+      <div class="sidebar-header">
+        <h2>Chat Rooms</h2>
+        <button
+          mat-icon-button
+          (click)="openCreateRoomDialog()"
+          [disabled]="isCreatingRoom"
+        >
+          <mat-icon>add</mat-icon>
+        </button>
+      </div>
+
+      <!-- Scrollable Rooms List -->
+      <div class="rooms-container">
+        <mat-nav-list>
+          <!-- Loading state -->
+          <div *ngIf="isLoading" class="loading-rooms">
+            <mat-progress-spinner
+              diameter="24"
+              mode="indeterminate"
+            ></mat-progress-spinner>
+            <span>Loading rooms...</span>
+          </div>
+
+          <!-- Rooms list -->
+          <a
+            mat-list-item
+            *ngFor="let room of rooms"
+            [routerLink]="['/room', room.id]"
+          >
+            <mat-icon matListItemIcon>forum</mat-icon>
+            <span matListItemTitle>{{ room.name }}</span>
+            <span matListItemLine
+              >Created {{ room.created_at | date : "short" }}</span
+            >
+          </a>
+
+          <!-- Empty state -->
+          <div *ngIf="!isLoading && rooms.length === 0" class="empty-state">
+            <mat-icon>info</mat-icon>
+            <p>No rooms available</p>
+          </div>
+        </mat-nav-list>
+      </div>
+
+      <!-- Fixed Footer -->
+      <div class="user-profile">
+        <div *ngIf="userData" class="profile-content">
+          <div class="user-info">
+            <mat-icon class="user-icon">account_circle</mat-icon>
+            <div>
+              <p class="user-name">{{ userData.full_name }}</p>
+              <p class="user-email">{{ userData.email }}</p>
+              <p class="user-role">{{ userData.role }}</p>
+            </div>
+          </div>
+          <button mat-raised-button color="warn" (click)="logout()">
+            <mat-icon>logout</mat-icon>
+            Logout
+          </button>
+        </div>
+      </div>
+    </mat-sidenav>
+
+    <!-- Main content -->
+    <mat-sidenav-content class="content">
+      <router-outlet></router-outlet>
+    </mat-sidenav-content>
+  </mat-sidenav-container>
+</div>
