@@ -1,1 +1,62 @@
-<p>dashboard works!</p>
+<!-- dashboard.component.html -->
+<div class="h-full flex flex-col">
+  <!-- Messages Container -->
+  <div class="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm p-4 mb-4">
+    <div
+      *ngIf="loadingMessages"
+      class="flex justify-center items-center h-full"
+    >
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+
+    <div
+      *ngIf="!loadingMessages && messages.length === 0"
+      class="flex flex-col items-center justify-center h-full text-gray-400"
+    >
+      <mat-icon class="!w-12 !h-12 mb-2">forum</mat-icon>
+      <p>No messages yet</p>
+      <p class="text-sm">Send a message to start the conversation</p>
+    </div>
+
+    <div *ngIf="!loadingMessages && messages.length > 0" class="space-y-4">
+      <div *ngFor="let message of messages" class="message">
+        <div class="flex items-start gap-3">
+          <div
+            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mt-1"
+          >
+            <mat-icon class="!text-sm">person</mat-icon>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-medium text-gray-800">{{
+                message.sender
+              }}</span>
+              <span class="text-xs text-gray-400">{{
+                message.timestamp | date : "shortTime"
+              }}</span>
+            </div>
+            <p class="text-gray-700">{{ message.content }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Message Input -->
+  <div *ngIf="roomId" class="bg-white rounded-lg shadow-sm p-4">
+    <form (ngSubmit)="sendMessage()" class="flex gap-2">
+      <mat-form-field appearance="fill" class="flex-1">
+        <mat-label>Type your message</mat-label>
+        <input matInput [(ngModel)]="newMessage" name="message" required />
+      </mat-form-field>
+      <button
+        mat-icon-button
+        color="primary"
+        type="submit"
+        [disabled]="!newMessage.trim()"
+      >
+        <mat-icon>send</mat-icon>
+      </button>
+    </form>
+  </div>
+</div>

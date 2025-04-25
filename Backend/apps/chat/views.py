@@ -81,7 +81,7 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         is_member = RoomMembership.objects.filter(user=user, room_id=room_id).exists()
         if not is_member:
-            raise PermissionDenied({"message":"You are not subscribed to this room."})
+            raise PermissionDenied({"message":"You are accessed to this room."})
         return self.queryset.filter(room_id=room_id)
 
     def perform_create(self, serializer):

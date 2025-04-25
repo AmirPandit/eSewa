@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>Create New Room</h2>
 
 <mat-dialog-content>
-  <mat-form-field appearance="outline" class="full-width">
+  <mat-form-field class="full-width">
     <mat-label>Room Name</mat-label>
     <input matInput [formControl]="roomName" required />
     <mat-error *ngIf="roomName.hasError('required')"

@@ -3,6 +3,7 @@ import { LayoutComponent } from './pages/layout/layout.component';
 import { LoginComponent } from './pages/login/login.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { AuthGuard } from '../service/auth.guard';
+import { RegisterComponent } from './pages/register/register.component';
 
 export const routes: Routes = [
     {
@@ -14,13 +15,18 @@ export const routes: Routes = [
         path:'login',
         component :LoginComponent
     },
+    {
+        path:'register',
+        component :RegisterComponent
+    },
     { 
-      path: 'dashboard', 
+      path: 'dashboard',
       component: LayoutComponent,
       canActivate: [AuthGuard],
       children: [
-        { path: '', component: DashboardComponent }
+        { path: '', component: DashboardComponent },
+        { path: ':room_id', component: DashboardComponent }
       ]
-    },
+      },
   
         ];

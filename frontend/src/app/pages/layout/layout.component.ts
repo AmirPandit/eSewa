@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 
 // Material Modules
@@ -15,6 +15,7 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CreateRoomDialogComponent } from './create-room-dialog/create-room-dialog/create-room-dialog.component';
+import { FormsModule } from '@angular/forms';
 
 interface ChatRoom {
   id: string;
@@ -23,6 +24,14 @@ interface ChatRoom {
   created_at: string;
   is_member: boolean;
   members_count: number;
+}
+
+interface Message {
+  id: string;
+  room: string;
+  content: string;
+  sender: string;
+  timestamp: string;
 }
 
 interface UserData {
@@ -44,16 +53,20 @@ interface UserData {
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
-    DatePipe,
     CommonModule,
+    FormsModule,
     RouterModule
   ],
   templateUrl: './layout.component.html',
   styleUrls: ['./layout.component.css']
 })
+
 export class LayoutComponent implements OnInit {
   rooms: ChatRoom[] = [];
-  userData: UserData | null = null;
+  activeRoomId: string | null = null;
+  activeRoom: ChatRoom | null = null;
+  userData: any = null;
+  
   isLoading = true;
   isCreatingRoom = false;
   isJoiningRoom = false;
@@ -63,13 +76,74 @@ export class LayoutComponent implements OnInit {
     private http: HttpClient,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
     this.loadRooms();
     this.loadUserData();
+    
+    this.route.params.subscribe(params => {
+      if (params['room_id']) {
+        this.activeRoomId = params['room_id'];
+        if (this.activeRoomId) {
+          this.loadRoomDetails(this.activeRoomId);
+        }
+      }
+    });
   }
+  loadRoomDetails(roomId: string): void {
+    const room = this.rooms.find(r => r.id === roomId);
+    if (room) {
+      this.activeRoom = room;
+    }
+  }
+
+
+  // // // loadMessages(roomId: string): void {
+  // // //   this.loadingMessages = true;
+  // // //   this.http.get<Message[]>(`http://127.0.0.1:8000/api/v1/chat/messages/?room_id=${roomId}`, this.getAuthHeaders())
+  // // //     .subscribe({
+  // // //       next: (messages) => {
+  // // //         this.messages = messages;
+  // // //         this.loadingMessages = false;
+  // // //         setTimeout(() => this.scrollToBottom(), 100);
+  // // //       },
+  // // //       error: (error) => {
+  // // //         this.snackBar.open('Failed to load messages', 'Close', { duration: 3000 });
+  // // //         this.loadingMessages = false;
+  // // //       }
+  // // //     });
+  // // // }
+
+  // // // sendMessage(): void {
+  // // //   if (!this.newMessage.trim() || !this.activeRoomId) return;
+    
+  // // //   const payload = {
+  // // //     room: this.activeRoomId,
+  // // //     content: this.newMessage
+  // // //   };
+    
+  // //   this.http.post('http://127.0.0.1:8000/api/v1/chat/messages/', payload, this.getAuthHeaders())
+  // //     .subscribe({
+  // //       next: (res: any) => {
+  // //         this.messages.push(res);
+  // //         this.newMessage = '';
+  // //         this.scrollToBottom();
+  // //       },
+  // //       error: (error) => {
+  // //         this.snackBar.open('Failed to send message', 'Close', { duration: 3000 });
+  // //       }
+  // //     });
+  // // }
+
+  // scrollToBottom(): void {
+  //   try {
+  //     this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
+  //   } catch(err) { }
+  // }
+
 
   private getAuthHeaders() {
     const token = localStorage.getItem('access_token');
