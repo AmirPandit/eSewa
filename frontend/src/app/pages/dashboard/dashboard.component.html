@@ -1,62 +1,165 @@
-<!-- dashboard.component.html -->
-<div class="h-full flex flex-col">
-  <!-- Messages Container -->
-  <div class="flex-1 overflow-y-auto bg-white rounded-lg shadow-sm p-4 mb-4">
-    <div
-      *ngIf="loadingMessages"
-      class="flex justify-center items-center h-full"
-    >
-      <mat-spinner diameter="40"></mat-spinner>
-    </div>
+<div class="h-screen flex flex-col bg-white text-gray-800">
+  <!-- Header -->
+  <header class="p-4 sticky top-0 z-10 bg-white">
+    <div class="flex items-center justify-between max-w-3xl mx-auto">
+      <h2 class="text-base font-medium truncate">
+        {{ roomTitle || (roomId ? "Dashboard" : "Select a Room") }}
+      </h2>
 
-    <div
-      *ngIf="!loadingMessages && messages.length === 0"
-      class="flex flex-col items-center justify-center h-full text-gray-400"
-    >
-      <mat-icon class="!w-12 !h-12 mb-2">forum</mat-icon>
-      <p>No messages yet</p>
-      <p class="text-sm">Send a message to start the conversation</p>
-    </div>
-
-    <div *ngIf="!loadingMessages && messages.length > 0" class="space-y-4">
-      <div *ngFor="let message of messages" class="message">
-        <div class="flex items-start gap-3">
-          <div
-            class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 mt-1"
-          >
-            <mat-icon class="!text-sm">person</mat-icon>
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-medium text-gray-800">{{
-                message.sender
-              }}</span>
-              <span class="text-xs text-gray-400">{{
-                message.timestamp | date : "shortTime"
-              }}</span>
-            </div>
-            <p class="text-gray-700">{{ message.content }}</p>
-          </div>
-        </div>
+      <div
+        *ngIf="!errorState && roomId && !loadingMessages"
+        (click)="onDelete(roomId || '')"
+        class="font-black bg-red-500 p-3 rounded-3xl text-white hover:bg-red-600 transition duration-200 ease-in-out cursor-pointer"
+      >
+        <a>unsubscribe</a>
       </div>
     </div>
-  </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-1 overflow-hidden flex flex-col">
+    <!-- Loading -->
+    <div
+      *ngIf="loadingMessages"
+      class="h-screen flex items-center justify-center text-center p-6 bg-white"
+    >
+      <mat-spinner diameter="30"></mat-spinner>
+    </div>
+
+    <!-- Error -->
+    <div
+      *ngIf="errorState"
+      class="h-screen flex items-center justify-center text-center p-6 bg-white"
+    >
+      <div>
+        <mat-icon class="text-5xl mb-4">error_outline</mat-icon>
+        <p class="font-medium mb-2">{{ errorMessage }}</p>
+        <button mat-button color="primary" (click)="loadMessages()">
+          Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- No Room Selected -->
+    <div
+      *ngIf="!roomId && !loadingMessages"
+      class="flex-1 flex flex-col items-center justify-center text-center p-6"
+    >
+      <mat-icon class="text-gray-400 text-5xl mb-4"
+        >chat_bubble_outline</mat-icon
+      >
+      <p class="font-medium mb-2">No Chat Selected</p>
+      <p class="text-sm text-gray-500">Choose a room to start chatting.</p>
+    </div>
+
+    <!-- No Messages -->
+    <div
+      *ngIf="!loadingMessages && !errorState && messages.length === 0 && roomId"
+      class="flex-1 flex flex-col items-center justify-center text-center p-6"
+    >
+      <mat-icon class="text-gray-400 text-5xl mb-4">forum</mat-icon>
+      <p class="font-medium mb-2">No Messages</p>
+      <p class="text-sm text-gray-500">Be the first to say something.</p>
+    </div>
+
+    <!-- Chat Messages -->
+    <div
+      #messagesContainer
+      class="messages-container flex-1 overflow-y-auto px-4 py-2"
+    >
+      <div class="max-w-2xl mx-auto space-y-4 pb-2">
+        <ng-container
+          *ngFor="let message of messages; trackBy: trackByMessageId"
+        >
+          <!-- Received Message (Left Side) -->
+          <div
+            *ngIf="message.sender.email !== currentUserEmail"
+            class="flex items-start gap-3"
+          >
+            <div
+              class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center"
+            >
+              <mat-icon class="text-sm text-gray-600">person</mat-icon>
+            </div>
+            <div class="min-w-0">
+              <div class="flex gap-2 items-center mb-1">
+                <span class="text-sm font-medium"
+                  >{{ message.sender.first_name }}
+                  {{ message.sender.last_name }}</span
+                >
+                <span class="text-xs text-gray-400">{{
+                  message.timestamp | date : "h:mm a"
+                }}</span>
+              </div>
+              <p
+                class="text-sm text-gray-700 bg-gray-100 rounded-lg px-3 py-2 inline-block"
+              >
+                {{ message.content }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Sent Message (Right Side) -->
+          <div
+            *ngIf="message.sender.email === currentUserEmail"
+            class="flex items-start gap-3 justify-end"
+          >
+            <div class="min-w-0 flex flex-col items-end">
+              <div class="flex gap-2 items-center mb-1">
+                <span class="text-xs text-gray-400">{{
+                  message.timestamp | date : "h:mm a"
+                }}</span>
+                <span class="text-sm font-medium">You</span>
+              </div>
+              <p
+                class="text-sm text-white bg-blue-500 rounded-lg px-3 py-2 inline-block"
+              >
+                {{ message.content }}
+              </p>
+            </div>
+            <div
+              class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"
+            >
+              <mat-icon class="text-sm text-blue-600">person</mat-icon>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+  </main>
 
   <!-- Message Input -->
-  <div *ngIf="roomId" class="bg-white rounded-lg shadow-sm p-4">
-    <form (ngSubmit)="sendMessage()" class="flex gap-2">
-      <mat-form-field appearance="fill" class="flex-1">
-        <mat-label>Type your message</mat-label>
-        <input matInput [(ngModel)]="newMessage" name="message" required />
+  <footer
+    *ngIf="roomId && !errorState && !loadingMessages"
+    class="p-3 sticky bottom-0 bg-white z-10"
+  >
+    <form
+      (ngSubmit)="sendMessage()"
+      class="max-w-2xl mx-auto flex gap-2 items-center justify-center"
+    >
+      <mat-form-field class="flex-1 !m-0" appearance="fill">
+        <textarea
+          matInput
+          [(ngModel)]="newMessage"
+          name="message"
+          placeholder="Type a message…"
+          required
+          cdkTextareaAutosize
+          cdkAutosizeMinRows="1"
+          cdkAutosizeMaxRows="4"
+          class="text-sm leading-tight resize-none"
+          (keydown.enter)="onEnterKeyPress($event)"
+        ></textarea>
       </mat-form-field>
       <button
         mat-icon-button
         color="primary"
         type="submit"
-        [disabled]="!newMessage.trim()"
+        [disabled]="!newMessage.trim() || sendingMessage"
       >
-        <mat-icon>send</mat-icon>
+        <mat-icon *ngIf="!sendingMessage">send</mat-icon>
+        <mat-spinner *ngIf="sendingMessage" diameter="20"></mat-spinner>
       </button>
     </form>
-  </div>
+  </footer>
 </div>

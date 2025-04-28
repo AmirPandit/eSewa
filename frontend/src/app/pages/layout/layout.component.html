@@ -1,13 +1,14 @@
-<div class="flex h-screen bg-gray-50">
-  <!-- Sidebar -->
-  <mat-sidenav-container class="w-full h-full">
-    <mat-sidenav
-      #sidenav
-      mode="side"
-      opened
-      class="!w-72 md:!w-80 border-r border-gray-200 bg-white flex flex-col shadow-sm"
-    >
-      <!-- Sidebar Header -->
+<mat-sidenav-container class="w-full h-full">
+  <mat-sidenav
+    #sidenav
+    mode="side"
+    opened
+    disableClose="true"
+    class="!w-72 md:!w-80 border-r border-gray-200 bg-white p-0"
+  >
+    <!-- Main flex column wrapper -->
+    <div class="flex flex-col h-full">
+      <!-- Sticky Header -->
       <div class="p-4 border-b border-gray-200 sticky top-0 z-10 bg-white">
         <div class="flex items-center justify-between">
           <h2 class="text-xl font-semibold text-gray-800">Chat Rooms</h2>
@@ -22,7 +23,7 @@
         </div>
       </div>
 
-      <!-- Rooms List -->
+      <!-- Scrollable Room List -->
       <div class="flex-1 overflow-y-auto">
         <mat-nav-list class="!p-0">
           <!-- Loading State -->
@@ -38,7 +39,7 @@
             <span>Loading rooms...</span>
           </div>
 
-          <!-- Rooms List -->
+          <!-- Rooms -->
           <a
             mat-list-item
             *ngFor="let room of rooms"
@@ -77,6 +78,7 @@
               ></mat-spinner>
             </button>
 
+            <!-- Message Icon -->
             <mat-icon
               *ngIf="room.is_member"
               class="!absolute !right-2 !top-1/2 !-translate-y-1/2 text-indigo-500"
@@ -91,19 +93,12 @@
           >
             <mat-icon class="!w-10 !h-10 mb-2">info</mat-icon>
             <p>No rooms available</p>
-            <button
-              mat-stroked-button
-              (click)="openCreateRoomDialog()"
-              class="mt-2"
-            >
-              Create your first room
-            </button>
           </div>
         </mat-nav-list>
       </div>
 
-      <!-- User Profile Footer -->
-      <div class="p-4 border-t border-gray-200 bg-white sticky bottom-0">
+      <!-- Sticky Footer: User Profile always sticks at the bottom -->
+      <div class="p-4 border-t border-gray-200 bg-white">
         <div *ngIf="userData" class="flex flex-col gap-3">
           <div class="flex items-center gap-3">
             <div
@@ -111,7 +106,7 @@
             >
               <mat-icon>account_circle</mat-icon>
             </div>
-            <div>
+            <div class="flex flex-col">
               <p class="text-gray-800 font-medium">{{ userData.full_name }}</p>
               <p class="text-gray-500 text-sm">{{ userData.email }}</p>
             </div>
@@ -127,32 +122,32 @@
           </button>
         </div>
       </div>
-    </mat-sidenav>
+    </div>
+  </mat-sidenav>
 
-    <!-- Main Content -->
-    <mat-sidenav-content class="bg-gray-50">
-      <div class="p-4 md:p-6 h-full flex flex-col">
-        <!-- Room Header -->
-        <div
-          *ngIf="activeRoom"
-          class="bg-white rounded-lg shadow-sm p-4 mb-4 flex items-center justify-between"
-        >
-          <div>
-            <h2 class="text-xl font-semibold text-gray-800">
-              {{ activeRoom.name }}
-            </h2>
-            <p class="text-gray-500 text-sm">
-              {{ activeRoom.members_count }} members
-            </p>
-          </div>
-          <button mat-icon-button class="!bg-gray-100 text-gray-600">
-            <mat-icon>more_vert</mat-icon>
-          </button>
+  <!-- Main Content -->
+  <mat-sidenav-content class="bg-gray-50">
+    <div class="p-4 md:p-6 h-full flex flex-col">
+      <!-- Room Header -->
+      <div
+        *ngIf="activeRoom"
+        class="bg-white rounded-lg shadow-sm p-4 mb-4 flex items-center justify-between"
+      >
+        <div>
+          <h2 class="text-xl font-semibold text-gray-800">
+            {{ activeRoom.name }}
+          </h2>
+          <p class="text-gray-500 text-sm">
+            {{ activeRoom.members_count }} members
+          </p>
         </div>
-
-        <!-- Messages Container -->
-        <router-outlet></router-outlet>
+        <button mat-icon-button class="!bg-gray-100 text-gray-600">
+          <mat-icon>more_vert</mat-icon>
+        </button>
       </div>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-</div>
+
+      <!-- Messages -->
+      <router-outlet></router-outlet>
+    </div>
+  </mat-sidenav-content>
+</mat-sidenav-container>

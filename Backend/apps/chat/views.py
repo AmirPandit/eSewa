@@ -5,34 +5,7 @@ from .models import ChatRoom, RoomMembership, Message
 from .serializers import ChatRoomSerializer, RoomMembershipSerializer, MessageSerializer
 from accounts.serializers import CustomUserSerializer
 from rest_framework.exceptions import PermissionDenied, ValidationError
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 
-def real_time_chat(instance, request):
-    document_url = (
-        request.build_absolute_uri(instance.document.url) if instance.document else None
-    )
-    message = instance.message if instance.message else None
-    user_data = None
-    receiver_data = None
-
-    if instance.sender:
-        user_data = CustomUserSerializer(
-            instance.sender, context={"request": request}
-        ).data
-
-    channel_layer = get_channel_layer()
-
-    message_data = {
-        "type": "chat",
-        "id": instance.id,
-        "sender": user_data if instance.sender else None,
-        "department": None,
-        "receiver": receiver_data if instance.receiver else None,
-        "document": document_url if instance.document else None,
-        "message": message,
-    }
-    async_to_sync(channel_layer.group_send)(f"{instance.receiver.id}", message_data)
 
 class ChatRoomViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ChatRoom.objects.all().order_by('-created_at')
@@ -67,8 +40,15 @@ class RoomMembershipViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
 
+    @action(detail=True, methods=['delete'], url_path='unsubscribe', permission_classes=[permissions.IsAuthenticated])
+    def unsubscribe(self, request, pk=None):
+        membership = RoomMembership.objects.get(room=pk, user=request.user)
+        if membership.user != request.user:
+            return Response({"detail": "You do not have permission to perform this action."}, status=status.HTTP_403_FORBIDDEN)
+        membership.delete()
+        return Response({"status": "unsubscribed"}, status=status.HTTP_204_NO_CONTENT)
+
 class MessageViewSet(viewsets.ModelViewSet):
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -78,16 +58,21 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         if not room_id:
             raise ValidationError({"message":"room_id parameter is required."})
+        
+        try:
+            is_member = RoomMembership.objects.filter(user=user, room_id=room_id).exists()
+            if not is_member:
+                raise PermissionDenied({"message":"You have not subscribed to this room."})
+        except:
+            raise PermissionDenied({"message":"You have not subscribed to this room."})
 
-        is_member = RoomMembership.objects.filter(user=user, room_id=room_id).exists()
-        if not is_member:
-            raise PermissionDenied({"message":"You are accessed to this room."})
-        return self.queryset.filter(room_id=room_id)
+        return Message.objects.filter(room_id=room_id)
 
     def perform_create(self, serializer):
-        room = serializer.validated_data['room']
+        room_id = serializer.validated_data['room_id']
         user = self.request.user
-        is_member = RoomMembership.objects.filter(user=user, room=room).exists()
+        is_member = RoomMembership.objects.filter(user=user, room_id=room_id).exists()
         if not is_member:
             raise PermissionDenied({"message":"You are not subscribed to this room."})
-        serializer.save(sender=user)
+        
+        serializer.save(sender_id=user.id)

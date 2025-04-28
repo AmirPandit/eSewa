@@ -5,7 +5,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 
-// Material Modules
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
@@ -16,6 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { CreateRoomDialogComponent } from './create-room-dialog/create-room-dialog/create-room-dialog.component';
 import { FormsModule } from '@angular/forms';
+import { environment } from '../../../environments/environment';
 
 interface ChatRoom {
   id: string;
@@ -62,6 +62,7 @@ interface UserData {
 })
 
 export class LayoutComponent implements OnInit {
+  apiUrl = environment.apiBaseUrl;
   rooms: ChatRoom[] = [];
   activeRoomId: string | null = null;
   activeRoom: ChatRoom | null = null;
@@ -92,7 +93,7 @@ export class LayoutComponent implements OnInit {
         }
       }
     });
-  }
+  } 
   loadRoomDetails(roomId: string): void {
     const room = this.rooms.find(r => r.id === roomId);
     if (room) {
@@ -100,58 +101,8 @@ export class LayoutComponent implements OnInit {
     }
   }
 
-
-  // // // loadMessages(roomId: string): void {
-  // // //   this.loadingMessages = true;
-  // // //   this.http.get<Message[]>(`http://127.0.0.1:8000/api/v1/chat/messages/?room_id=${roomId}`, this.getAuthHeaders())
-  // // //     .subscribe({
-  // // //       next: (messages) => {
-  // // //         this.messages = messages;
-  // // //         this.loadingMessages = false;
-  // // //         setTimeout(() => this.scrollToBottom(), 100);
-  // // //       },
-  // // //       error: (error) => {
-  // // //         this.snackBar.open('Failed to load messages', 'Close', { duration: 3000 });
-  // // //         this.loadingMessages = false;
-  // // //       }
-  // // //     });
-  // // // }
-
-  // // // sendMessage(): void {
-  // // //   if (!this.newMessage.trim() || !this.activeRoomId) return;
-    
-  // // //   const payload = {
-  // // //     room: this.activeRoomId,
-  // // //     content: this.newMessage
-  // // //   };
-    
-  // //   this.http.post('http://127.0.0.1:8000/api/v1/chat/messages/', payload, this.getAuthHeaders())
-  // //     .subscribe({
-  // //       next: (res: any) => {
-  // //         this.messages.push(res);
-  // //         this.newMessage = '';
-  // //         this.scrollToBottom();
-  // //       },
-  // //       error: (error) => {
-  // //         this.snackBar.open('Failed to send message', 'Close', { duration: 3000 });
-  // //       }
-  // //     });
-  // // }
-
-  // scrollToBottom(): void {
-  //   try {
-  //     this.messagesContainer.nativeElement.scrollTop = this.messagesContainer.nativeElement.scrollHeight;
-  //   } catch(err) { }
-  // }
-
-
-  private getAuthHeaders() {
-    const token = localStorage.getItem('access_token');
-    return {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    };
+  setActiveRoom(roomId: string): void {
+    this.activeRoomId = roomId;
   }
 
   loadUserData(): void {
@@ -165,7 +116,7 @@ export class LayoutComponent implements OnInit {
     const refreshToken = localStorage.getItem('refresh_token');
     
     if (refreshToken) {
-      this.http.post('http://127.0.0.1:8000/api/v1/accounts/logout/', {
+      this.http.post(`${this.apiUrl}/accounts/logout/`, {
         refresh_token: refreshToken
       }).subscribe({
         next: () => {
@@ -194,7 +145,7 @@ export class LayoutComponent implements OnInit {
   
   loadRooms(): void {
     this.isLoading = true;
-    this.http.get<ChatRoom[]>('http://127.0.0.1:8000/api/v1/chat/rooms/', this.getAuthHeaders())
+    this.http.get<ChatRoom[]>(`${this.apiUrl}/chat/rooms/`)
       .subscribe({
         next: (rooms) => {
           this.rooms = rooms;
@@ -225,9 +176,8 @@ export class LayoutComponent implements OnInit {
   createRoom(name: string): void {
     this.isCreatingRoom = true;
     this.http.post(
-      'http://127.0.0.1:8000/api/v1/chat/rooms/create/', 
-      { name }, 
-      this.getAuthHeaders()
+      `${this.apiUrl}/chat/rooms/create/`, 
+      { name }
     ).subscribe({
       next: () => {
         this.snackBar.open('Room created successfully', 'Close', { duration: 3000 });
@@ -249,9 +199,8 @@ export class LayoutComponent implements OnInit {
     this.currentJoiningRoomId = roomId;
     
     this.http.post(
-      `http://127.0.0.1:8000/api/v1/chat/rooms/${roomId}/join/`,
-      {},
-      this.getAuthHeaders()
+      `${this.apiUrl}/chat/rooms/${roomId}/join/`,
+      {}
     ).subscribe({
       next: () => {
         this.snackBar.open('Successfully joined room', 'Close', { duration: 3000 });

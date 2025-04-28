@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./Backend
+    container_name: backend
+    command: >
+      sh -c "
+      echo 'Waiting for database...';
+      while ! pg_isready -h db -p 5432 -U amir; do
+        echo 'Postgres not ready, sleeping...';
+        sleep 2;
+      done;
+      echo 'Postgres ready!';
+      python manage.py migrate &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - ./Backend:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.base
+      - POSTGRES_USER=amir
+      - POSTGRES_PASSWORD=esewa@0D8H
+      - POSTGRES_DB=esewaChat
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    container_name: db
+    environment:
+      POSTGRES_DB: esewaChat
+      POSTGRES_USER: amir
+      POSTGRES_PASSWORD: esewa@0D8H
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U amir -d esewaChat"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: frontend
+    ports:
+      - "4200:4200"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+    command: >
+      sh -c "npm install && npm run build && serve -s dist/frontend/browser/ -l 4200"
+      
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

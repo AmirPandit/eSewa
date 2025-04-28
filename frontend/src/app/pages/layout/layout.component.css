@@ -38,3 +38,38 @@
   align-items: center;
   justify-content: center;
 }
+
+/* Sidebar Scroll */
+.mat-sidenav-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-sidenav {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.mat-sidenav-content {
+  overflow: hidden; /* Prevent full content scroll */
+}
+
+.mat-sidenav .mat-nav-list {
+  flex-grow: 1; /* Allow the middle section to take up available space */
+  overflow-y: auto; /* Scrollable list */
+}
+
+.mat-sidenav .sticky {
+  position: sticky;
+  z-index: 10;
+}
+
+.mat-sidenav .top {
+  top: 0;
+}
+
+.mat-sidenav .bottom {
+  bottom: 0;
+}
