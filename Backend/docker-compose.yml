@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    command: >
+      sh -c "
+      echo 'Waiting for databases...';
+      
+      # Wait for PostgreSQL
+      while ! PGPASSWORD=password psql -h db -U user -d mydb -c 'SELECT 1' >/dev/null 2>&1; do
+        echo 'PostgreSQL not ready, sleeping...';
+        sleep 2;
+      done;
+      
+      # Wait for Cassandra
+      while ! cqlsh cassandra_db 9042 -e 'DESCRIBE KEYSPACES' >/dev/null 2>&1; do
+        echo 'Cassandra not ready, sleeping...';
+        sleep 2;
+      done;
+      
+      echo 'All databases ready!';
+      pip install -r requirements.txt &&
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py sync_cassandra &&
+      python manage.py runserver 0.0.0.0:8000
+      "
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - cassandra_db
+    environment:
+      - DJANGO_SETTINGS_MODULE=config.settings.base
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=mydb
+    networks:
+      - app-network
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: mydb
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d mydb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  cassandra_db:
+    image: cassandra:4.1
+    container_name: cassandra_db
+    environment:
+      - CASSANDRA_CLUSTER_NAME=chat-cluster
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - JVM_OPTS=-Xms512m -Xmx512m
+      - CASSANDRA_STARTUP_TIMEOUT=120
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES'"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 30s
+
+volumes:
+  cassandra_data:
+
+networks:
+  app-network:
+    driver: bridge

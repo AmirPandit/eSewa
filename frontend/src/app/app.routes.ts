@@ -28,5 +28,10 @@ export const routes: Routes = [
         { path: ':room_id', component: DashboardComponent }
       ]
       },
+      {
+        path: '**', 
+        redirectTo: 'login',
+        pathMatch: 'full'
+    }
   
         ];

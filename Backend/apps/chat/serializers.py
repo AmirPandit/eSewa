@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import ChatRoom, RoomMembership, Message
-
+from accounts.serializers import UserSerializer
+from accounts.models import CustomUser
 class ChatRoomSerializer(serializers.ModelSerializer):
     class Meta:
         model = ChatRoom
@@ -26,9 +27,29 @@ class RoomMembershipSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         validated_data['user'] = self.context['request'].user
         return super().create(validated_data)
-    
+
 class MessageSerializer(serializers.ModelSerializer):
+    sender = UserSerializer(read_only=True)
     class Meta:
         model = Message
         fields = ['id', 'room', 'sender', 'content', 'timestamp']
         read_only_fields = ['id', 'timestamp', 'sender']
+
+    
+# class MessageCassendraSerializer(serializers.Serializer):
+#     id = serializers.UUIDField(read_only=True)
+#     room_id = serializers.UUIDField()
+#     sender_id = serializers.UUIDField(read_only=True)
+#     content = serializers.CharField()
+#     document = serializers.CharField(allow_null=True)
+#     timestamp = serializers.DateTimeField(read_only=True)
+
+#     def create(self, validated_data):
+#         return Message.create(**validated_data)
+
+#     def to_representation(self, instance):
+#         ret = super().to_representation(instance)
+#         # You'll need to fetch the user from PostgreSQL
+#         user = CustomUser.objects.get(id=instance.sender_id)
+#         ret['sender'] = UserSerializer(user).data
+#         return ret

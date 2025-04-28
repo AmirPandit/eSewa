@@ -11,6 +11,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -36,6 +37,7 @@ export class RegisterComponent {
   registerForm: FormGroup;
   isLoading = false;
   hidePassword = true;
+  private apiUrl = environment.apiBaseUrl;
 
   constructor(
     private fb: FormBuilder,
@@ -73,10 +75,9 @@ export class RegisterComponent {
       role: 'admin'
     };
 
-    // Remove confirmPassword before sending
     delete formData.confirmPassword;
 
-    this.http.post('http://127.0.0.1:8000/api/v1/accounts/register/', formData)
+    this.http.post(`${this.apiUrl}/accounts/register/`, formData)
       .subscribe({
         next: () => {
           this.isLoading = false;

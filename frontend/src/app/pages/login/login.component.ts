@@ -13,6 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDividerModule } from '@angular/material/divider';
+import { environment } from '../../../environments/environment';
 
 
 @Component({
@@ -39,6 +40,8 @@ export class LoginComponent {
   loginForm: FormGroup;
   isLoading = false;
   hidePassword = true;
+  private apiUrl = environment.apiBaseUrl;
+  
 
   constructor(
     private fb: FormBuilder,
@@ -50,6 +53,7 @@ export class LoginComponent {
       email: ['', [Validators.required, Validators.email]],
       password: ['', Validators.required]
     });
+    this.checkAuthentication();
   }
 
   onSubmit() {
@@ -63,11 +67,11 @@ export class LoginComponent {
       password: this.loginForm.value.password
     };
 
-    this.http.post('http://localhost:8000/api/v1/accounts/login/', loginData)
+    this.http.post(`${this.apiUrl}/accounts/login/`, loginData)
       .subscribe({
         next: (response: any) => {
           if (response.status === 'success') {
-            // Save tokens and user data to local storage
+            
             localStorage.setItem('access_token', response.data.access);
             localStorage.setItem('refresh_token', response.data.refresh);
             localStorage.setItem('user_data', JSON.stringify({
@@ -77,12 +81,10 @@ export class LoginComponent {
               username: response.data.username
             }));
 
-            // Show success message
             this.snackBar.open('Login successful!', 'Close', {
               duration: 3000
             });
 
-            // Redirect to dashboard or home page
             this.router.navigate(['/dashboard']);
           } else {
             this.showError('Login failed. Please try again.');
@@ -102,4 +104,11 @@ export class LoginComponent {
       panelClass: ['error-snackbar']
     });
   }
+  private checkAuthentication() {
+    const accessToken = localStorage.getItem('access_token');
+    if (accessToken) {
+      this.router.navigate(['/dashboard']);
+    }
+  }
+  
 }

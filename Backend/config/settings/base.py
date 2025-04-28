@@ -18,7 +18,7 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # Applications
 INSTALLED_APPS = [
-    "channels",
+    "socketio",
     "daphne",
     'django.contrib.admin',
     'django.contrib.auth',
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
     "corsheaders",
+    "django_cassandra_engine",
 
 
 
@@ -97,13 +98,34 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database (will be overridden in dev/prod)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'esewaChat',
+        'USER': 'amir',
+        'PASSWORD': 'esewa@0D8H',
+        'HOST': 'db',
+        'PORT': 5432,
+    },
+    # 'cassandra': {
+    #     'ENGINE': 'django_cassandra_engine',
+    #     'NAME': 'chat_keyspace',
+    #     'HOST': 'cassandra_db',
+    #     'PORT': 9042,
+    #     'OPTIONS': {
+    #         'replication': {
+    #             'strategy_class': 'SimpleStrategy',
+    #             'replication_factor': 1
+    #         },
+    #         'connection': {
+    #             'retry_connect': True,
+    #             'connect_timeout': 30,
+    #             'timeout': 30
+    #         }
+    #     }
+    # }
 }
+
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -137,8 +159,19 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:4200",
+    # Add other allowed origins as needed
+]
+
+# For Socket.IO specifically, you might also need:
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost:4200",
+]
+
+
 # Cors configuration
-CORS_ALLOW_ALL_ORIGINS= True
+# CORS_ALLOW_ALL_ORIGINS= True
 # CORS_ALLOWED_ORIGINS = ["http://localhost:4200",]
 
 CORS_ALLOW_HEADERS = (
