@@ -43,10 +43,10 @@ media/
 *.env
 
 # Docker
-docker-compose.override.yml
-*.dockerignore
-Dockerfile
-.docker-compose.yml
+# docker-compose.override.yml
+# *.dockerignore
+# Dockerfile
+# .docker-compose.yml
 
 # VS Code
 .vscode/
