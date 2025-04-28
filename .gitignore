@@ -34,7 +34,7 @@ yarn-error.log
 package-lock.json
 pnpm-lock.yaml
 
-# === OS and Editor ===
+# === OS and Editor ===df
 *.swp
 *.swo
 .idea/
