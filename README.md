@@ -1,6 +1,6 @@
 # ESewa Full-Stack Application
 
-A full-stack application with a **Django** backend and **React** frontend, using **Docker**.
+A full-stack application with a **Django** backend and **Angular** frontend, using **Docker**.
 
 ## Requirements
 
