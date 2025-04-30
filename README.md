@@ -11,7 +11,7 @@ A full-stack application with a **Django** backend and **Angular** frontend, usi
 1. Clone the repository:
 
     ```bash
-    git clone https://github.com/your-username/esewa.git
+    git clone https://github.com/amirpandit/esewa.git
     cd esewa
     ```
 
